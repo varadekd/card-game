@@ -215,8 +215,23 @@ func TestDrawCardsFromDeck(t *testing.T) {
 	})
 
 	t.Run("Drawing cards from the deckID not part of data", func(t *testing.T) {
-		res, code := util.RequestAndDecodeResponse("PUT", "/deck/invalidID/draw-cards", nil, t, router)
+		payload := map[string]int{
+			"cardsToBeDrawn": 200,
+		}
 
+		payloadString, err := json.Marshal(payload)
+
+		if err != nil {
+			t.Errorf("Test execution failed because of an error. Err: %s", err.Error())
+		}
+
+		newDeckID := uuid.New()
+
+		api := fmt.Sprintf("/deck/%s/draw-cards", newDeckID.String())
+
+		res, code := util.RequestAndDecodeResponse("PUT", api, payloadString, t, router)
+
+		fmt.Println("RES", res)
 		// Verifying api status it should be 404
 		assert.Equal(t, http.StatusNotFound, code, fmt.Sprintf("We expected http status %d but got %d", http.StatusNotFound, code))
 
