@@ -231,7 +231,6 @@ func TestDrawCardsFromDeck(t *testing.T) {
 
 		res, code := util.RequestAndDecodeResponse("PUT", api, payloadString, t, router)
 
-		fmt.Println("RES", res)
 		// Verifying api status it should be 404
 		assert.Equal(t, http.StatusNotFound, code, fmt.Sprintf("We expected http status %d but got %d", http.StatusNotFound, code))
 
