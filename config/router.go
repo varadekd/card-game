@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +17,13 @@ func SetupRouter() *gin.Engine {
 	// RUN: export GIN_MODE=release
 
 	// gin.SetMode(gin.ReleaseMode)
+
+	// Creating server ping
+	router.GET("/ping", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "pong",
+		})
+	})
 
 	return router
 }
