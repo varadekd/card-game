@@ -163,3 +163,112 @@ func TestOpenDeck(t *testing.T) {
 		assert.Equal(t, msg, res.Error, fmt.Sprintf("We expected error message to be %s but found %s", msg, res.Error))
 	})
 }
+
+func TestDrawCardsFromDeck(t *testing.T) {
+
+	t.Run("Drawing valid numbers of cards that can be drawn from deck", func(t *testing.T) {
+		payload := map[string]int{
+			"cardsToBeDrawn": 2,
+		}
+
+		payloadString, err := json.Marshal(payload)
+
+		if err != nil {
+			t.Errorf("Test execution failed because of an error. Err: %s", err.Error())
+		}
+
+		api := fmt.Sprintf("/deck/%s/draw-cards", deckID)
+		res, code := util.RequestAndDecodeResponse("PUT", api, payloadString, t, router)
+
+		// Verifying api status it should be 200
+		assert.Equal(t, http.StatusOK, code, fmt.Sprintf("We expected http status %d but got %d", http.StatusOK, code))
+
+		// Verify that the success field in the API response is set to 'true' to indicate success
+		assert.Equal(t, true, res.Success, fmt.Sprintf("We expected the 'success' field to be set to true but found it as %t", res.Success))
+
+		// Verifying that Data field is not empty, if it is empty failing the test case
+		assert.NotNil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should not be nil"))
+	})
+
+	t.Run("Drawing invalid numbers of cards that can be drawn from deck", func(t *testing.T) {
+		payload := map[string]int{
+			"cardsToBeDrawn": 200,
+		}
+
+		payloadString, err := json.Marshal(payload)
+
+		if err != nil {
+			t.Errorf("Test execution failed because of an error. Err: %s", err.Error())
+		}
+
+		api := fmt.Sprintf("/deck/%s/draw-cards", deckID)
+		res, code := util.RequestAndDecodeResponse("PUT", api, payloadString, t, router)
+
+		// Verifying api status it should be 409
+		assert.Equal(t, http.StatusConflict, code, fmt.Sprintf("We expected http status %d but got %d", http.StatusConflict, code))
+
+		// Verify that the success field in the API response is set to 'false' to indicate success
+		assert.Equal(t, false, res.Success, fmt.Sprintf("We expected the 'success' field to be set to false but found it as %t", res.Success))
+
+		// Verifying that Data field is not empty, if it is empty failing the test case
+		assert.Nil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should not nil"))
+	})
+
+	t.Run("Drawing cards from the deckID not part of data", func(t *testing.T) {
+		res, code := util.RequestAndDecodeResponse("PUT", "/deck/invalidID/draw-cards", nil, t, router)
+
+		// Verifying api status it should be 404
+		assert.Equal(t, http.StatusNotFound, code, fmt.Sprintf("We expected http status %d but got %d", http.StatusNotFound, code))
+
+		// Verify that the success field in the API response is set to 'false' to indicate success
+		assert.Equal(t, false, res.Success, fmt.Sprintf("We expected the 'success' field to be set to false but found it as %t", res.Success))
+
+		// Verifying that Data field is not empty, if it is empty failing the test case
+		assert.Nil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should not nil"))
+	})
+
+	t.Run("Drawing cards using invalid payload", func(t *testing.T) {
+		payload := map[string]string{
+			"cardsToBeDrawn": "10",
+		}
+
+		payloadString, err := json.Marshal(payload)
+
+		if err != nil {
+			t.Errorf("Test execution failed because of an error. Err: %s", err.Error())
+		}
+
+		api := fmt.Sprintf("/deck/%s/draw-cards", deckID)
+		res, code := util.RequestAndDecodeResponse("PUT", api, payloadString, t, router)
+
+		// Verifying api status it should be 400
+		assert.Equal(t, http.StatusBadRequest, code, fmt.Sprintf("We expected http status %d but got %d", http.StatusCreated, code))
+
+		// Verify that the success field in the API response is set to 'false' to indicate failure
+		assert.Equal(t, false, res.Success, fmt.Sprintf("We expected the 'success' field to be set to false but found it as %t", res.Success))
+
+		// Verifying that Data field is not empty, if it is empty failing the test case
+		assert.Nil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should not nil"))
+
+		// Verifying error message
+		msg := "User shared and invalid payload"
+		assert.Equal(t, msg, res.Error, fmt.Sprintf("We expected error message to be %s but found %s", msg, res.Error))
+	})
+
+	t.Run("Drawing cards using invalid deckID", func(t *testing.T) {
+		res, code := util.RequestAndDecodeResponse("PUT", "/deck/invalidID/draw-cards", nil, t, router)
+
+		// Verifying api status it should be 400
+		assert.Equal(t, http.StatusBadRequest, code, fmt.Sprintf("We expected http status %d but got %d", http.StatusOK, code))
+
+		// Verify that the success field in the API response is set to 'false' to indicate success
+		assert.Equal(t, false, res.Success, fmt.Sprintf("We expected the 'success' field to be set to false but found it as %t", res.Success))
+
+		// Verifying that Data field is not empty, if it is empty failing the test case
+		assert.Nil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should be nil"))
+
+		// Verifying error message
+		msg := "DeckID is invalid"
+		assert.Equal(t, msg, res.Error, fmt.Sprintf("We expected error message to be %s but found %s", msg, res.Error))
+	})
+}
