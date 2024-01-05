@@ -144,9 +144,9 @@ func TestOpenDeck(t *testing.T) {
 	})
 
 	t.Run("Fetching deck with deckID not part of data", func(t *testing.T) {
-		newUUIDID := uuid.New()
+		newDeckID := uuid.New()
 
-		api := fmt.Sprintf("/deck/%s", newUUIDID)
+		api := fmt.Sprintf("/deck/%s", newDeckID.String())
 		res, code := util.RequestAndDecodeResponse("GET", api, nil, t, router)
 
 		// Verifying api status it should be 404
