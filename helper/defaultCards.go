@@ -7,9 +7,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/varadekd/card-game/model"
-	"github.com/varadekd/card-game/util"
 )
 
 var DEFAULT_SUIT_SEQUENCE = []string{"SPADES", "DIAMONDS", "CLUBS", "HEARTS"}
@@ -17,7 +17,7 @@ var CARD_SEQUENCE = []string{"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", 
 
 func GenerateDefaultDeck() error {
 	// fetching the file location from env variable
-	filePath, err := util.GetEnvVariable("DEFAULT_CARDS_FILE_STORAGE")
+	filePath, err := getEnvVariable("DEFAULT_CARDS_FILE_STORAGE")
 
 	if err != nil {
 		return err
@@ -55,4 +55,18 @@ func GenerateDefaultDeck() error {
 	fmt.Println("Default set of cards generated successfully.")
 
 	return nil
+}
+
+func getEnvVariable(variable string) (string, error) {
+	val, variableFound := os.LookupEnv(variable)
+
+	if !variableFound {
+		return val, fmt.Errorf("we were unable to find variable %s in the application environment", variable)
+	}
+
+	if val == "" {
+		return val, fmt.Errorf("no value found for variable %s in the application environment", variable)
+	}
+
+	return val, nil
 }
