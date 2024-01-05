@@ -19,3 +19,6 @@
 
 # Go workspace file
 go.work
+
+# Excluding the data folder from the git commits
+data/*
