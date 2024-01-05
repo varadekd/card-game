@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/varadekd/card-game/api"
 )
 
 // SetupRouter is responsible for enabling HTTP requests using Gin for this application.
@@ -25,6 +26,8 @@ func SetupRouter() *gin.Engine {
 		})
 	})
 
+	// Calling all the apis
+	api.SetupDeckApi(router)
 	return router
 }
 
