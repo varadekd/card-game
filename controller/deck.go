@@ -102,3 +102,35 @@ func GeneratedDeck(c *gin.Context) {
 	response.Data = deck
 	c.JSON(http.StatusCreated, response)
 }
+
+func OpenDeck(c *gin.Context) {
+
+	deckID := c.Param("id")
+	response := helper.ResponseJSON{}
+
+	if deckID == "" {
+		response.Error = "DeckID is missing"
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	_, err := uuid.Parse(deckID)
+
+	if err != nil {
+		response.Error = "DeckID is invalid"
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	for _, deck := range generatedDecks {
+		if deckID == deck.ID.String() {
+			response.Success = true
+			response.Data = deck
+			c.JSON(http.StatusOK, response)
+			return
+		}
+	}
+
+	response.Error = "DeckID not found"
+	c.JSON(http.StatusNotFound, response)
+}
