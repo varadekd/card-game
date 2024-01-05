@@ -8,4 +8,5 @@ import (
 func SetupDeckApi(r *gin.Engine) {
 	r.POST("/deck/new", controller.GeneratedDeck)
 	r.GET("/deck/:id", controller.OpenDeck)
+	r.PUT("/deck/:id/draw-cards", controller.DrawCardsFromDeck)
 }

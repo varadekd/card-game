@@ -27,3 +27,7 @@ type GenerateDeckPayload struct {
 	Shuffle bool     `json:"shuffle"`
 	Cards   []string `json:"cards"`
 }
+
+type DrawCardFromDeckPayload struct {
+	CardsToBeDrawn int `json:"cardsToBeDrawn"`
+}

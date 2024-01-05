@@ -134,3 +134,89 @@ func OpenDeck(c *gin.Context) {
 	response.Error = "DeckID not found"
 	c.JSON(http.StatusNotFound, response)
 }
+
+func DrawCardsFromDeck(c *gin.Context) {
+	deckID := c.Param("id")
+	response := helper.ResponseJSON{}
+
+	if deckID == "" {
+		response.Error = "DeckID is missing"
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	_, err := uuid.Parse(deckID)
+
+	if err != nil {
+		response.Error = "DeckID is invalid"
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// payload verification
+	payload := model.DrawCardFromDeckPayload{}
+
+	err = c.ShouldBindJSON(&payload)
+
+	if err != nil {
+		fmt.Errorf("Got an error while parsing new deck payload. Error: %s", err.Error())
+		response.Error = "User shared and invalid payload"
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	deckFound := false
+	currentDeck := model.Deck{}
+	currentDeckIndex := 0
+
+	for index, deck := range generatedDecks {
+		if deckID == deck.ID.String() {
+			currentDeckIndex = index
+			currentDeck = deck
+			deckFound = true
+			break
+		}
+	}
+
+	if !deckFound {
+		fmt.Errorf("We where unable to find deck with the deck ID: %s", deckID)
+		response.Error = "DeckID not found"
+		c.JSON(http.StatusNotFound, response)
+		return
+	}
+
+	if payload.CardsToBeDrawn > currentDeck.CardsRemaining {
+		fmt.Errorf("Unable to draw cards from the deck, request %d cards but we only have %d remaining", payload.CardsToBeDrawn, currentDeck.CardsRemaining)
+		response.Error = "There are no more cards left to be drawn from the deck"
+		c.JSON(http.StatusConflict, response)
+		return
+	}
+
+	drawnCards, remainingCards := drawCards(currentDeck.PlayingCards, payload.CardsToBeDrawn)
+
+	// TODO: Add database for handling such updating of data, currently the data is
+	// stored in the variable which will be vanished once the application is terminated.
+	// Updating the current deck with remaining cards and updating count and time
+	generatedDecks[currentDeckIndex].CardsRemaining = currentDeck.CardsRemaining - payload.CardsToBeDrawn
+	generatedDecks[currentDeckIndex].PlayingCards = remainingCards
+	generatedDecks[currentDeckIndex].DeckLastUsed = time.Now()
+
+	response.Success = true
+	response.Data = drawnCards
+	c.JSON(http.StatusOK, response)
+}
+
+// drawCards will allow us to fetch cards from the deck.
+// Currently this algorithm fetches the cards in array sequence.
+// The function returns the drawn cards and also returns the remaining cards left in deck.
+func drawCards(cards []model.Card, cardsToBeDrawn int) ([]model.Card, []model.Card) {
+	rand.Seed(time.Now().UnixNano())
+
+	drawnCards := make([]model.Card, cardsToBeDrawn)
+	copy(drawnCards, cards[:cardsToBeDrawn])
+
+	remainingCards := make([]model.Card, 0, len(cards)-cardsToBeDrawn)
+	remainingCards = append(remainingCards, cards[cardsToBeDrawn:]...)
+
+	return drawnCards, remainingCards
+}
