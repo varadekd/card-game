@@ -17,7 +17,7 @@ var CARD_SEQUENCE = []string{"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", 
 
 func GenerateDefaultDeck() error {
 	// fetching the file location from env variable
-	filePath, err := getEnvVariable("DEFAULT_CARDS_FILE_STORAGE")
+	filePath, err := GetEnvVariable("DEFAULT_CARDS_FILE_STORAGE")
 
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func GenerateDefaultDeck() error {
 	return nil
 }
 
-func getEnvVariable(variable string) (string, error) {
+func GetEnvVariable(variable string) (string, error) {
 	val, variableFound := os.LookupEnv(variable)
 
 	if !variableFound {
