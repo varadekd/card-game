@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/varadekd/card-game/config"
 	"github.com/varadekd/card-game/helper"
@@ -14,6 +15,10 @@ import (
 )
 
 var router *gin.Engine
+
+// We will temporarily store the deck ID from the TestGenerateDeck suite for further verification of other APIs.
+
+var deckID string
 
 func TestGenerateDeck(t *testing.T) {
 	// Setting up router for the test execution
@@ -68,6 +73,13 @@ func TestGenerateDeck(t *testing.T) {
 
 		// Verifying that Data field is not empty, if it is empty failing the test case
 		assert.NotNil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should not be nil"))
+
+		if res.Data != nil {
+			// For these api the data that will be returned will in form on map[string]interface{}
+			resData := res.Data.(map[string]interface{})
+			deckID = resData["_id"].(string)
+		}
+
 	})
 
 	t.Run("Generating deck with invalid payload", func(t *testing.T) {
@@ -94,6 +106,60 @@ func TestGenerateDeck(t *testing.T) {
 
 		// Verifying error message
 		msg := "User shared and invalid payload"
+		assert.Equal(t, msg, res.Error, fmt.Sprintf("We expected error message to be %s but found %s", msg, res.Error))
+	})
+}
+
+func TestOpenDeck(t *testing.T) {
+
+	t.Run("Fetching deck with valid deckID", func(t *testing.T) {
+		api := fmt.Sprintf("/deck/%s", deckID)
+		res, code := util.RequestAndDecodeResponse("GET", api, nil, t, router)
+
+		// Verifying api status it should be 200
+		assert.Equal(t, http.StatusOK, code, fmt.Sprintf("We expected http status %d but got %d", http.StatusOK, code))
+
+		// Verify that the success field in the API response is set to 'true' to indicate success
+		assert.Equal(t, true, res.Success, fmt.Sprintf("We expected the 'success' field to be set to true but found it as %t", res.Success))
+
+		// Verifying that Data field is not empty, if it is empty failing the test case
+		assert.NotNil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should not be nil"))
+	})
+
+	t.Run("Fetching deck with invalid deckID", func(t *testing.T) {
+		res, code := util.RequestAndDecodeResponse("GET", "/deck/invalidID", nil, t, router)
+
+		// Verifying api status it should be 400
+		assert.Equal(t, http.StatusBadRequest, code, fmt.Sprintf("We expected http status %d but got %d", http.StatusOK, code))
+
+		// Verify that the success field in the API response is set to 'false' to indicate success
+		assert.Equal(t, false, res.Success, fmt.Sprintf("We expected the 'success' field to be set to false but found it as %t", res.Success))
+
+		// Verifying that Data field is not empty, if it is empty failing the test case
+		assert.Nil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should be nil"))
+
+		// Verifying error message
+		msg := "DeckID is invalid"
+		assert.Equal(t, msg, res.Error, fmt.Sprintf("We expected error message to be %s but found %s", msg, res.Error))
+	})
+
+	t.Run("Fetching deck with deckID not part of data", func(t *testing.T) {
+		newUUIDID := uuid.New()
+
+		api := fmt.Sprintf("/deck/%s", newUUIDID)
+		res, code := util.RequestAndDecodeResponse("GET", api, nil, t, router)
+
+		// Verifying api status it should be 404
+		assert.Equal(t, http.StatusNotFound, code, fmt.Sprintf("We expected http status %d but got %d", http.StatusNotFound, code))
+
+		// Verify that the success field in the API response is set to 'false' to indicate success
+		assert.Equal(t, false, res.Success, fmt.Sprintf("We expected the 'success' field to be set to false but found it as %t", res.Success))
+
+		// Verifying that Data field is not empty, if it is empty failing the test case
+		assert.Nil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should be nil"))
+
+		// Verifying error message
+		msg := "DeckID not found"
 		assert.Equal(t, msg, res.Error, fmt.Sprintf("We expected error message to be %s but found %s", msg, res.Error))
 	})
 }
