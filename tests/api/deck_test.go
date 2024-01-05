@@ -96,13 +96,13 @@ func TestGenerateDeck(t *testing.T) {
 		res, code := util.RequestAndDecodeResponse("POST", "/deck/new", payloadString, t, router)
 
 		// Verifying api status it should be 400
-		assert.Equal(t, http.StatusBadRequest, code, fmt.Sprintf("We expected http status %d but got %d", http.StatusCreated, code))
+		assert.Equal(t, http.StatusBadRequest, code, fmt.Sprintf("We expected http status %d but got %d", http.StatusBadRequest, code))
 
 		// Verify that the success field in the API response is set to 'false' to indicate failure
 		assert.Equal(t, false, res.Success, fmt.Sprintf("We expected the 'success' field to be set to false but found it as %t", res.Success))
 
-		// Verifying that Data field is not empty, if it is empty failing the test case
-		assert.NotNil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should not be nil"))
+		// Verifying that Data field is empty, if it is not empty failing the test case
+		assert.Nil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should not nil"))
 
 		// Verifying error message
 		msg := "User shared and invalid payload"
@@ -155,7 +155,7 @@ func TestOpenDeck(t *testing.T) {
 		// Verify that the success field in the API response is set to 'false' to indicate success
 		assert.Equal(t, false, res.Success, fmt.Sprintf("We expected the 'success' field to be set to false but found it as %t", res.Success))
 
-		// Verifying that Data field is not empty, if it is empty failing the test case
+		// Verifying that Data field is empty, if it is not empty failing the test case
 		assert.Nil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should be nil"))
 
 		// Verifying error message
@@ -210,7 +210,7 @@ func TestDrawCardsFromDeck(t *testing.T) {
 		// Verify that the success field in the API response is set to 'false' to indicate success
 		assert.Equal(t, false, res.Success, fmt.Sprintf("We expected the 'success' field to be set to false but found it as %t", res.Success))
 
-		// Verifying that Data field is not empty, if it is empty failing the test case
+		// Verifying that Data field is empty, if it is not empty failing the test case
 		assert.Nil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should not nil"))
 	})
 
@@ -223,7 +223,7 @@ func TestDrawCardsFromDeck(t *testing.T) {
 		// Verify that the success field in the API response is set to 'false' to indicate success
 		assert.Equal(t, false, res.Success, fmt.Sprintf("We expected the 'success' field to be set to false but found it as %t", res.Success))
 
-		// Verifying that Data field is not empty, if it is empty failing the test case
+		// Verifying that Data field is empty, if it is not empty failing the test case
 		assert.Nil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should not nil"))
 	})
 
@@ -247,7 +247,7 @@ func TestDrawCardsFromDeck(t *testing.T) {
 		// Verify that the success field in the API response is set to 'false' to indicate failure
 		assert.Equal(t, false, res.Success, fmt.Sprintf("We expected the 'success' field to be set to false but found it as %t", res.Success))
 
-		// Verifying that Data field is not empty, if it is empty failing the test case
+		// Verifying that Data field is empty, if it is not empty failing the test case
 		assert.Nil(t, res.Data, fmt.Sprintf("We expected that the data within the response field should not nil"))
 
 		// Verifying error message
